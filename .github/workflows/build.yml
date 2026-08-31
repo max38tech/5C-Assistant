@@ -16,7 +16,7 @@ jobs:
     - name: Install Dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y clang curl git libssl-dev ldid xz-utils
+        sudo apt-get install -y build-essential clang curl fakeroot git libssl-dev xz-utils
 
     - name: Install Theos
       run: |
