@@ -1,4 +1,4 @@
-name: Build iOS Kiosk App
+name: Build iOS Kiosk App (Theos)
 
 on:
   push:
@@ -8,42 +8,32 @@ on:
 
 jobs:
   build:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v4
 
     - name: Install Dependencies
       run: |
-        brew install xcodegen
-        brew install ldid
+        sudo apt-get update
+        sudo apt-get install -y clang curl git libssl-dev ldid xz-utils
 
-    - name: Generate Xcode Project
-      run: xcodegen generate
-
-    - name: Build Application
+    - name: Install Theos
       run: |
-        xcodebuild -project Antigravity5C.xcodeproj \
-          -scheme Antigravity5C \
-          -configuration Release \
-          -sdk iphoneos \
-          -arch armv7 -arch arm64 \
-          CODE_SIGN_IDENTITY="" \
-          CODE_SIGNING_REQUIRED=NO \
-          CODE_SIGNING_ALLOWED=NO \
-          build \
-          CONFIGURATION_BUILD_DIR="$(pwd)/build"
+        bash -c "$(curl -fsSL https://raw.githubusercontent.com/theos/theos/master/bin/install-theos)"
+        echo "THEOS=~/theos" >> $GITHUB_ENV
+        echo "~/theos/bin" >> $GITHUB_PATH
 
-    - name: Package IPA
+    - name: Download iOS SDK
       run: |
-        mkdir -p Payload
-        cp -r build/Antigravity5C.app Payload/
-        # Strip code signature requirements for jailbroken devices
-        ldid -S Payload/Antigravity5C.app/Antigravity5C || true
-        zip -r Antigravity5C.ipa Payload
-        
-    - name: Upload IPA Artifact
+        git clone https://github.com/theos/sdks.git ~/theos/sdks
+
+    - name: Build Application (DEB Package)
+      run: |
+        make package FINALPACKAGE=1
+
+    - name: Upload DEB Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: Antigravity5C-Jailbreak
-        path: Antigravity5C.ipa
+        name: Antigravity5C-Jailbreak-DEB
+        path: packages/*.deb

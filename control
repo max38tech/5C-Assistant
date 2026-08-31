@@ -1,0 +1,9 @@
+Package: com.antigravity.5c
+Name: Antigravity5C
+Depends: mobilesubstrate
+Version: 1.0.0
+Architecture: iphoneos-arm
+Description: AI Kiosk Assistant
+Maintainer: max38tech
+Author: max38tech
+Section: Utilities
